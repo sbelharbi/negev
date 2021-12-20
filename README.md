@@ -4,7 +4,7 @@ org/abs/xxxx.xxxxx](https://arxiv.org/abs/xxxx.xxxxx))
 
 ### Citation:
 ```
-@article{fcamsbelharbi2021,
+@article{negevsbelharbi2021,
   title={Negative Evidence Matters  in Interpretable Histology Image Classification},
   author={Belharbi, S. and  Pedersoli, M and
   Ben Ayed, I. and McCaffrey, L. and Granger, E.},
