@@ -19,11 +19,22 @@ Please create a github issue.
 
 
 ### Content:
+* [Method](#method)
+* [Results](#results)
 * [Requirements](#re2q)
 * [Datasets](#datasets)
 * [Run code](#run)
-* [Method](#method)
-* [Results](#results)
+
+
+
+#### <a name='method'> Method</a>:
+<img src="doc/method.png" alt="method" width="600">
+
+#### <a name='results'> Results</a>:
+
+<img src="doc/glas-results.png" alt="glas-results" width="600">
+
+<img src="doc/cam16-results.png" alt="camelyon16-results" width="600">
 
 #### <a name='reqs'> Requirements</a>:
 
@@ -157,13 +168,3 @@ torchrun --nnodes=1 --node_rank=0 --nproc_per_node=1 \
 
 * Train the CAM-method first. Then, copy the best model from the exp folder
   into the folder [./pretrained](./pretrained). Copy the whole folder with this name format `GLAS-0-resnet50-CAM-WGAP-cp_best_localization`.
-
-
-#### <a name='method'> Method</a>:
-<img src="doc/method.png" alt="method" width="600">
-
-#### <a name='results'> Results</a>:
-
-<img src="doc/glas-results.png" alt="glas-results" width="600">
-
-<img src="doc/cam16-results.png" alt="camelyon16-results" width="600">
