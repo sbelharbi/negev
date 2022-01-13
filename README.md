@@ -1,6 +1,6 @@
 ### Pytorch 1.10.0 code for:
 `Negative Evidence Matters in Interpretable Histology Image Classification` ([https://arxiv.
-org/abs/xxxx.xxxxx](https://arxiv.org/abs/xxxx.xxxxx))
+org/abs/2201.02445](https://arxiv.org/abs/2201.02445))
 
 ### Citation:
 ```
