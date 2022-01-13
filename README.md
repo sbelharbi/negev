@@ -9,7 +9,7 @@ org/abs/2201.02445](https://arxiv.org/abs/2201.02445))
   author={Belharbi, S. and  Pedersoli, M and
   Ben Ayed, I. and McCaffrey, L. and Granger, E.},
   journal={CoRR},
-  volume={abs/xxxx.xxxxx},
+  volume={abs/2201.02445},
   year={2021}
 }
 ```
