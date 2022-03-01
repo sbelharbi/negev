@@ -6,8 +6,7 @@ org/abs/2201.02445](https://arxiv.org/abs/2201.02445))
 ```
 @inproceedings{negevsbelharbi2021,
   title={Negative Evidence Matters  in Interpretable Histology Image Classification},
-  author={Belharbi, S. and  Pedersoli, M and
-  Ben Ayed, I. and McCaffrey, L. and Granger, E.},
+  author={Belharbi, S. and  Pedersoli, M and Ben Ayed, I. and McCaffrey, L. and Granger, E.},
   booktitle = {Medical Imaging with Deep Learning (MIDL)},
   year      = {2022}
 }
