@@ -2,6 +2,8 @@
 `Negative Evidence Matters in Interpretable Histology Image Classification` ([https://arxiv.
 org/abs/2201.02445](https://arxiv.org/abs/2201.02445))
 
+### [[Slides]](/doc/slides.pdf)  [[Video presentation]](/doc/video.mkl)  [[Poster]](/doc/poster.pdf)
+
 ### Citation:
 ```
 @inproceedings{negevsbelharbi2022,
