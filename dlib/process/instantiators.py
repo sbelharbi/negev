@@ -392,7 +392,8 @@ def get_pretrainde_classifier(args):
     DLLogger.log(msg)
 
     if args.task == constants.NEGEV:
-        cl_cp = args.negev_ptretrained_cl_cp
+        cl_cp = args.negev_ptretrained_loc_cp  # best_loc. used to build 
+        # cams on the fly if they are not stored for negev.
         std_cl_args = deepcopy(args)
         std_cl_args.task = constants.STD_CL
         tag = get_tag(std_cl_args, checkpoint_type=cl_cp)
@@ -405,7 +406,14 @@ def get_pretrainde_classifier(args):
     else:
         source_tag = basename(path_cl)
 
-    assert tag == source_tag, f'{tag}, {source_tag}'
+    # todo:
+    # not necesarely true. but you need to check that classifier of negev 
+    # and this classifier are the same. the tag contains info about the 
+    # checkpoint type. it is not necessary to be identical.
+    # remove the checkpoint info from both tags, and comapre.
+    # the 2 classifiers need to be identical.
+    # see how the tag is created.
+    # assert tag == source_tag, f'{tag}, {source_tag}'
 
     if args.method in spec_mth:
         weights = torch.load(join(path_cl, 'model.pt'),
@@ -627,7 +635,7 @@ def get_model(args, eval=False, eval_path_weights=''):
         DLLogger.log(msg)
 
         if args.task == constants.NEGEV:
-            cl_cp = args.negev_ptretrained_cl_cp
+            cl_cp = args.negev_ptretrained_cl_cp  # best_cl
             std_cl_args = deepcopy(args)
             std_cl_args.task = constants.STD_CL
             tag = get_tag(std_cl_args, checkpoint_type=cl_cp)

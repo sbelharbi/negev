@@ -147,7 +147,8 @@ torchrun --nnodes=1 --node_rank=0 --nproc_per_node=1 \
                          --debug_subfolder None \
                          --amp True \
                          --opt__lr 0.1 \
-                         --negev_ptretrained_cl_cp best_localization \
+                         --negev_ptretrained_cl_cp best_classification \
+                         --negev_ptretrained_loc_cp best_localization \
                          --elb_init_t 1.0 \
                          --elb_max_t 10.0 \
                          --elb_mulcoef 1.01 \
@@ -167,4 +168,4 @@ torchrun --nnodes=1 --node_rank=0 --nproc_per_node=1 \
 ```
 
 * Train the CAM-method first. Then, copy the best model from the exp folder
-  into the folder [./pretrained](./pretrained). Copy the whole folder with this name format `GLAS-0-resnet50-CAM-WGAP-cp_best_localization`.
+  into the folder [./pretrained](./pretrained). Copy the whole folder with this name format `GLAS-0-resnet50-CAM-WGAP-cp_best_localization` and `GLAS-0-resnet50-CAM-WGAP-cp_best_classification`.

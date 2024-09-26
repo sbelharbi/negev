@@ -295,8 +295,11 @@ def get_config(ds: str, fold: int, magnification: str) -> dict:
         'minmax_lambda_size': 1e-3,
         'minmax_lambda_neg': 1e-7,
         # NEGEV ----------------------------------------------------------------
-        "negev_ptretrained_cl_cp": constants.BEST_LOC,  # check point for
-        # pretrained classifier.
+        "negev_ptretrained_cl_cp": constants.BEST_CL,  # check point for
+        # BEST_CL pretrained classifier.
+        "negev_ptretrained_loc_cp": constants.BEST_LOC,  # check point for
+        # BEST_LOC pretrained classifier. used to create cams from a classifiers.
+        # the cam is used to generate pseudo-labels.
         # NEGEV:  self-learning
         "sl_ng": False,  # use self-learning over negev cams.
         "sl_ng_seeder": constants.SEED_PROB,  # type of seeder.

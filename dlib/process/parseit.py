@@ -478,7 +478,9 @@ def get_args(args: dict, eval: bool = False):
                         help='negev: negative samples: end epoch.')
 
     parser.add_argument('--negev_ptretrained_cl_cp', type=str, default=None,
-                        help='negev: checkpoint for pretrained classifier.')
+                        help='negev: checkpoint for pretrained classifier (BEST_CL).')
+    parser.add_argument('--negev_ptretrained_loc_cp', type=str, default=None,
+                        help='negev: checkpoint for pretrained classifier (BEST_LOC).')
 
     input_parser = parser.parse_args()
 
@@ -573,7 +575,7 @@ def get_args(args: dict, eval: bool = False):
 
     if args['model']['freeze_cl']:
         if args['task'] == constants.NEGEV:
-            cl_cp = args['negev_ptretrained_cl_cp']
+            cl_cp = args['negev_ptretrained_cl_cp']  # pick best_cl.
             std_cl_args = deepcopy(args)
             std_cl_args['task'] = constants.STD_CL
             tag = get_tag(Dict2Obj(std_cl_args), checkpoint_type=cl_cp)
@@ -592,7 +594,7 @@ def get_args(args: dict, eval: bool = False):
         for split in constants.SPLITS:
 
             if args['task'] == constants.NEGEV:
-                cl_cp = args['negev_ptretrained_cl_cp']
+                cl_cp = args['negev_ptretrained_loc_cp']  # best_loc to get cams.
                 std_cl_args = deepcopy(args)
                 std_cl_args['task'] = constants.STD_CL
                 tag = get_tag(Dict2Obj(std_cl_args), checkpoint_type=cl_cp)
@@ -675,6 +677,8 @@ def get_args(args: dict, eval: bool = False):
     if args.task == constants.NEGEV:
         assert args.negev_ptretrained_cl_cp in [constants.BEST_LOC,
                                                 constants.BEST_CL]
+        assert args.negev_ptretrained_loc_cp in [constants.BEST_LOC,
+                                                 constants.BEST_CL]
 
     assert args.runmode in [constants.RMODE_FINAL, constants.RMODE_SEARCH]
 
