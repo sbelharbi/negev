@@ -465,4 +465,4 @@ def create_thumbnail(l_imgs, file_out, scale=5):
     img_big.thumbnail((w_, h_))
 
     # Save file
-    img_big.save(file_out, format="PNG", quality=100, optimize=True)
+    img_big.save(file_out, format="PNG", quality=100)

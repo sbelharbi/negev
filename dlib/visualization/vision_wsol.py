@@ -77,7 +77,7 @@ class Viz_WSOL(object):
         self.gt_col = _GT_COLOR
         self.pred_col = _PRED_COLOR
         self.dpi = 50
-        self.alpha = 128
+        self.alpha = 0.5
         self.heatmap_cmap = plt.get_cmap("jet")
         self.mask_cmap_seg = get_bin_mask_colormap_segm()
         self.mask_cmap_bbox = get_bin_mask_colormap_bbx()
@@ -343,8 +343,7 @@ class Viz_WSOL(object):
             ax.xaxis.set_major_locator(plt.NullLocator())
             ax.yaxis.set_major_locator(plt.NullLocator())
 
-        fig.savefig(outf, pad_inches=0, bbox_inches='tight', dpi=self.dpi,
-                    optimize=True)
+        fig.savefig(outf, pad_inches=0, bbox_inches='tight', dpi=self.dpi)
         plt.close(fig)
 
     def _watch_plot_entropy(self, data: dict, outf: str):
@@ -416,7 +415,7 @@ class Viz_WSOL(object):
             lambda xx, pos: '{0:g}'.format(xx / scale_x))
         axes[0, 0].xaxis.set_major_formatter(ticks_x)
 
-        fig.savefig(outf, bbox_inches='tight', dpi=self.dpi, optimize=True)
+        fig.savefig(outf, bbox_inches='tight', dpi=self.dpi)
         plt.close(fig)
 
     def _plot_meter(self, metrics: dict, fout: str, perfs_keys: list,
