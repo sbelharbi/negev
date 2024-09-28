@@ -458,25 +458,10 @@ def get_config(ds: str, fold: int, magnification: str) -> dict:
         'amp': False,  # if true, use automatic mixed-precision for training
         'amp_eval': False,  # if true, amp is used for inference.
         # ======================================================================
-        #                             DDP:
-        # NOT CC(): means single machine.  CC(): multiple nodes.
+        #                             CUDA
         # ======================================================================
-        'local_rank': 0,  # int. for not CC(). must be 0 if just one node.
-        'local_world_size': 1,  # int. for not CC(). number of gpus to use.
-        'rank': 0,  # int. global rank. useful for CC(). 0 otherwise. will be
-        # set automatically.
-        'init_method': '',  # str. CC(). init method. needs to be defined.
-        # will be be determined automatically.
-        'dist_backend': constants.GLOO,  # str. CC() or not CC(). distributed
-        # backend.
-        'world_size': 1,  # init. CC(). total number of gpus. will be
-        # determined automatically.
-        'is_master': False,  # will be set automatically if this process is
-        # the master.
         'c_cudaid': 0,  # int. current cuda id. auto-set.
-        'distributed': False,  # bool. auto-set. indicates whether we are
-        # using ddp or not. This will help differentiate when accessing to
-        # model.attributes when it is wrapped with a ddp and when not.
+
     }
 
     pre = constants.FORMAT_DEBUG.split('_')[0]

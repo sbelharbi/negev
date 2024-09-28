@@ -19,7 +19,6 @@ from torch.utils.data import DataLoader
 import torch.nn.functional as F
 
 from torch.cuda.amp import autocast
-import torch.distributed as dist
 
 from tqdm import tqdm as tqdm
 
@@ -311,9 +310,6 @@ class CAMComputer(object):
             #     cam_normalized = self.normalizecam(cam_resized)
             #     self.evaluator.accumulate(cam_normalized, image_id)
 
-        if self.args.distributed:
-            self.evaluator._synch_across_gpus()
-            dist.barrier()
 
         return self.evaluator.compute()
 

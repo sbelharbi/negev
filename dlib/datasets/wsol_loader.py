@@ -15,7 +15,6 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from torchvision import transforms
 import torchvision.transforms.functional as TF
-from torch.utils.data.distributed import DistributedSampler
 
 PROB_THRESHOLD = 0.5  # probability threshold.
 
@@ -385,8 +384,7 @@ def get_data_loader(data_roots,
                     mask_root='',
                     num_val_sample_per_class=0,
                     std_cams_folder=None,
-                    get_splits_eval=None,
-                    distributed_eval=False
+                    get_splits_eval=None
                     ):
     train_sampler = None
 
@@ -414,26 +412,15 @@ def get_data_loader(data_roots,
                 )
             for split in get_splits_eval
         }
-        if distributed_eval:
-            loaders = {
-                split: DataLoader(
-                    eval_datasets[split],
-                    batch_size=batch_size,
-                    shuffle=False,
-                    sampler=DistributedSampler(dataset=eval_datasets[split],
-                                               shuffle=False),
-                    num_workers=workers)
-                for split in get_splits_eval
-            }
-        else:
-            loaders = {
-                split: DataLoader(
-                    eval_datasets[split],
-                    batch_size=batch_size,
-                    shuffle=False,
-                    num_workers=workers)
-                for split in get_splits_eval
-            }
+        
+        loaders = {
+            split: DataLoader(
+                eval_datasets[split],
+                batch_size=batch_size,
+                shuffle=False,
+                num_workers=workers)
+            for split in get_splits_eval
+        }
 
         return loaders, train_sampler
 
@@ -473,23 +460,15 @@ def get_data_loader(data_roots,
         for split in _SPLITS
     }
 
-    samplers = {
-        split: DistributedSampler(dataset=datasets[split],
-                                  shuffle=split == constants.TRAINSET)
-        for split in _SPLITS
-    }
 
     loaders = {
         split: DataLoader(
             datasets[split],
             batch_size=batch_size,
-            shuffle=False,
-            sampler=samplers[split],
+            shuffle=True if split == constants.TRAINSET else False,
             num_workers=workers)
         for split in _SPLITS
     }
 
-    if constants.TRAINSET in _SPLITS:
-        train_sampler = samplers[constants.TRAINSET]
 
-    return loaders, train_sampler
+    return loaders

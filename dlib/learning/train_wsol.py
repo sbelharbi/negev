@@ -16,7 +16,6 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import yaml
 import torch.nn.functional as F
-import torch.distributed as dist
 
 from torch.cuda.amp import autocast
 from torch.cuda.amp import GradScaler
@@ -38,7 +37,6 @@ from dlib.cams import selflearning
 from dlib.learning.inference_wsol import CAMComputer
 from dlib.cams import build_std_cam_extractor
 
-from dlib.parallel import sync_tensor_across_gpus
 from dlib.parallel import MyDDP as DDP
 
 from dlib.div_classifiers.parts.has import has as wsol_has
@@ -169,10 +167,9 @@ class Trainer(Basic):
         self.perf_gist_tracker = self._set_perf_gist_tracker()
         self.model = model
 
-        if isinstance(model, DDP):
-            self._pytorch_model = self.model.module
-        else:
-            self._pytorch_model = self.model
+        assert not isinstance(model, DDP), 'no longer support ddp.'
+
+        self._pytorch_model = self.model
 
         self.loss: losses.MasterLoss = loss
         self.optimizer = optimizer
@@ -562,25 +559,12 @@ class Trainer(Basic):
                 scaler.step(self.optimizer)
                 scaler.update()
 
-        if self.args.distributed:
-            nxx = torch.tensor([num_images], dtype=torch.float,
-                               requires_grad=False, device=torch.device(
-                    self.args.c_cudaid)).view(1, )
-            num_images = sync_tensor_across_gpus(nxx).sum().item()
-            total_loss = sync_tensor_across_gpus(total_loss.view(1, )).sum()
 
         loss_average = total_loss.item() / float(num_images)
 
         classification_acc = 0.0
         if self.args.task != constants.SEG:
-
-            if self.args.distributed:
-                num_correct = sync_tensor_across_gpus(
-                    num_correct.view(1, )).sum()
-
             classification_acc = num_correct.item() / float(num_images) * 100
-
-        dist.barrier()
 
         self.performance_meters[split]['classification'].update(
             classification_acc)
@@ -723,17 +707,8 @@ class Trainer(Basic):
             num_correct += (pred == targets).sum()
             num_images += images.size(0)
 
-        # sync
-        if self.args.distributed:
-            num_correct = sync_tensor_across_gpus(
-                num_correct.view(1, )).sum()
-            nx = torch.tensor(
-                [num_images], dtype=torch.float, requires_grad=False,
-                device=torch.device(self.args.c_cudaid)).view(1, )
-            num_images = sync_tensor_across_gpus(nx).sum().item()
 
         classification_acc = num_correct / float(num_images) * 100
-        dist.barrier()
 
         torch.cuda.empty_cache()
         return classification_acc.item()
@@ -847,7 +822,7 @@ class Trainer(Basic):
         DLLogger.log(fmsg("CAM EVALUATE TIME of {} split: {}".format(
             split, dt.datetime.now() - t0)))
 
-        if split == constants.TESTSET and self.args.is_master:
+        if split == constants.TESTSET:
             cam_computer.draw_some_best_pred()
 
         avg = self.args.multi_iou_eval
@@ -864,8 +839,7 @@ class Trainer(Basic):
         self.perf_gist_tracker[splitpx].update(
             epoch=epoch, new_value=cam_computer.evaluator.perf_gist)
 
-        if split in [constants.TESTSET,
-                     constants.VALIDSET] and self.args.is_master:
+        if split in [constants.TESTSET, constants.VALIDSET]:
 
             curves = cam_computer.evaluator.curve_s
             if split == constants.TESTSET:

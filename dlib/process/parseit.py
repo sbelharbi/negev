@@ -17,7 +17,6 @@ import yaml
 import munch
 import numpy as np
 import torch
-import torch.distributed as dist
 
 root_dir = dirname(dirname(dirname(abspath(__file__))))
 sys.path.append(root_dir)
@@ -328,21 +327,6 @@ def get_args(args: dict, eval: bool = False):
     parser.add_argument("--amp_eval", type=str2bool, default=None,
                         help="Whether to use automatic mixed precision for "
                              "inference.")
-    # DDP
-    parser.add_argument("--local_rank", type=int, default=None,
-                        help='DDP. Local rank. Set too zero if you are using '
-                             'one node. not CC().')
-    parser.add_argument("--local_world_size", type=int, default=None,
-                        help='DDP. Local world size: number of gpus per node. '
-                             'Not CC().')
-
-    parser.add_argument('--init_method', default=None,
-                        type=str,
-                        help='DDP. init method. CC().')
-    parser.add_argument('--dist_backend', default=None, type=str,
-                        help='DDP. Distributed backend. CC()')
-    parser.add_argument('--world_size', type=int, default=None,
-                        help='DDP. World size. CC().')
 
     parser.add_argument('--adl_drop_rate', type=float, default=None,
                         help='Float.drop-rate for ADL.')
@@ -641,30 +625,9 @@ def get_args(args: dict, eval: bool = False):
                 if os.path.isdir(path_cams):
                     args['std_cams_folder'][split] = path_cams
 
-    # DDP. ---------------------------------------------------------------------
-    ngpus_per_node = torch.cuda.device_count()
-
-    if is_cc():  # multiple nodes. each w/ multiple gpus.
-        local_rank = int(os.environ.get("SLURM_LOCALID"))
-        rank = int(os.environ.get("SLURM_NODEID")) * ngpus_per_node + local_rank
-
-        # available_gpus = os.environ.get('CUDA_VISIBLE_DEVICES').split(',')
-        current_device = local_rank
-        torch.cuda.set_device(current_device)
-
-        args['rank'] = rank
-        args['local_rank'] = local_rank
-        args['is_master'] = ((local_rank == 0) and (rank == 0))
-        args['c_cudaid'] = current_device
-
-    else:  # single machine w/ multiple gpus.
-        args['local_rank'] = int(os.environ["LOCAL_RANK"])
-        args['world_size'] = ngpus_per_node
-        args['is_master'] = args['local_rank'] == 0
-        torch.cuda.set_device(args['local_rank'])
-        args['c_cudaid'] = args['local_rank']
-        args['world_size'] = ngpus_per_node
-
+    # CUDA ---------------------------------------------------------------------
+    torch.cuda.set_device(0)
+    args['c_cudaid'] = 0
     # --------------------------------------------------------------------------
 
     reproducibility.set_to_deterministic(seed=int(args["MYSEED"]), verbose=True)
@@ -948,23 +911,6 @@ def parse_input(eval=False):
                                        magnification=input_args.magnification)
         args, args_dict = get_args(args)
 
-        if is_cc():
-            dist.init_process_group(backend=args.dist_backend,
-                                    init_method=args.init_method,
-                                    world_size=args.world_size,
-                                    rank=args.rank)
-        else:
-            dist.init_process_group(backend=args.dist_backend)
-
-        group = dist.group.WORLD
-        group_size = torch.distributed.get_world_size(group)
-        args_dict['distributed'] = group_size > 1
-        assert group_size == args_dict['world_size']
-        args.distributed = group_size > 1
-        assert group_size == args.world_size
-        if args.distributed:
-            assert args.dist_backend == constants.NCCL
-
         log_backends = [
             ArbJSONStreamBackend(Verbosity.VERBOSE,
                                  join(args.outd, "log.json")),
@@ -975,12 +921,8 @@ def parse_input(eval=False):
         if args.verbose:
             log_backends.append(ArbStdOutBackend(Verbosity.VERBOSE))
 
-        if not args.is_master:
-            dist.barrier()
-            DLLogger.init_arb(backends=log_backends, master_pid=os.getpid())
-        else:
-            DLLogger.init_arb(backends=log_backends, master_pid=os.getpid())
-            dist.barrier()
+        DLLogger.init_arb(backends=log_backends, master_pid=os.getpid())
+        
 
         DLLogger.log(fmsg("Start time: {}".format(args.t0)))
 
@@ -1000,26 +942,22 @@ def parse_input(eval=False):
 
         outd = args.outd
 
-        if not args.is_master:
-            dist.barrier()
-        else:
-            if not os.path.exists(join(outd, "code/")):
-                os.makedirs(join(outd, "code/"))
+        if not os.path.exists(join(outd, "code/")):
+            os.makedirs(join(outd, "code/"))
 
-            with open(join(outd, "code/config.yml"), 'w') as fyaml:
-                yaml.dump(args_dict, fyaml)
+        with open(join(outd, "code/config.yml"), 'w') as fyaml:
+            yaml.dump(args_dict, fyaml)
 
-            with open(join(outd, "config.yml"), 'w') as fyaml:
-                yaml.dump(args_dict, fyaml)
+        with open(join(outd, "config.yml"), 'w') as fyaml:
+            yaml.dump(args_dict, fyaml)
 
-            str_cmd = wrap_sys_argv_cmd(" ".join(sys.argv), "time python")
-            with open(join(outd, "code/cmd.sh"), 'w') as frun:
-                frun.write("#!/usr/bin/env bash \n")
-                frun.write(str_cmd)
+        str_cmd = wrap_sys_argv_cmd(" ".join(sys.argv), "time python")
+        with open(join(outd, "code/cmd.sh"), 'w') as frun:
+            frun.write("#!/usr/bin/env bash \n")
+            frun.write(str_cmd)
 
-            copy_code(join(outd, "code/"), compress=True, verbose=False)
+        copy_code(join(outd, "code/"), compress=True, verbose=False)
 
-            dist.barrier()
     else:
 
         raise NotImplementedError

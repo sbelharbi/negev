@@ -7,7 +7,6 @@ import torch
 from torch import Tensor
 from torch import nn
 import torch.nn.functional as F
-# from torch.nn.parallel import DistributedDataParallel as DDP
 
 
 root_dir = dirname(dirname(dirname(abspath(__file__))))
@@ -18,8 +17,6 @@ from dlib.stdcl.classifier import STDClassifier
 from dlib.unet.model import UnetFCAM
 from dlib.unet.model import UnetNEGEV
 from dlib.unet.model import Unet
-
-from dlib.parallel import MyDDP as DDP
 
 
 __all__ = ['BuiltinCam', 'ReadyCam', 'DeepMILCam', 'MaxMinCam',
@@ -51,7 +48,7 @@ class BuiltinCam:
 
     @staticmethod
     def assert_model(model: STDClassifier) -> None:
-        # _model = model if not isinstance(model, DDP) else model.module
+
         _model = model
 
         assert isinstance(_model, STDClassifier)
@@ -456,8 +453,7 @@ class SegmentationCam:
 
     @staticmethod
     def assert_model(model: Union[UnetFCAM, Unet]) -> None:
-        # _model = model if not isinstance(model, DDP) else model.module
-
+        
         _model = model
 
         # assert isinstance(_model, UnetFCAM), type(model)

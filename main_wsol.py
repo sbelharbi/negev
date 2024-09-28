@@ -2,11 +2,7 @@ import datetime as dt
 import sys
 from copy import deepcopy
 
-# from torch.nn.parallel import DistributedDataParallel as DDP
-import torch.distributed as dist
-from torch.utils.data.distributed import DistributedSampler
 
-from dlib.parallel import MyDDP as DDP
 from dlib.process.parseit import parse_input
 
 from dlib.process.instantiators import get_model
@@ -31,8 +27,6 @@ def main():
     model = get_model(args)
 
     model.cuda(args.c_cudaid)
-    # if args.distributed:
-    model = DDP(model, device_ids=[args.c_cudaid])
 
     best_state_dict = deepcopy(model.state_dict())
 
@@ -53,14 +47,12 @@ def main():
     trainer.evaluate(epoch=0, split=constants.VALIDSET)
     trainer.model_selection(epoch=0)
 
-    if args.is_master:
-        trainer.print_performances()
-        trainer.report(epoch=0, split=constants.VALIDSET)
+    trainer.print_performances()
+    trainer.report(epoch=0, split=constants.VALIDSET)
 
     DLLogger.log(fmsg("Epoch 0 done."))
 
     for epoch in range(trainer.args.max_epochs):
-        dist.barrier()
 
         zepoch = epoch + 1
         DLLogger.log(fmsg(("Start epoch {} ...".format(zepoch))))
@@ -70,19 +62,17 @@ def main():
         trainer.evaluate(zepoch, split=constants.VALIDSET)
         trainer.model_selection(epoch=zepoch)
 
-        if args.is_master:
-            trainer.report_train(train_performance, zepoch)
-            trainer.print_performances()
-            trainer.report(zepoch, split=constants.VALIDSET)
-            DLLogger.log(fmsg(("Epoch {} done.".format(zepoch))))
+        trainer.report_train(train_performance, zepoch)
+        trainer.print_performances()
+        trainer.report(zepoch, split=constants.VALIDSET)
+        DLLogger.log(fmsg(("Epoch {} done.".format(zepoch))))
 
         trainer.adjust_learning_rate()
         DLLogger.flush()
 
-    if args.is_master:
-        trainer.save_checkpoints()
+    
+    trainer.save_checkpoints()
 
-    dist.barrier()
     trainer.save_best_epoch()
     trainer.capture_perf_meters()
 
@@ -118,12 +108,11 @@ def main():
                          checkpoint_type=eval_checkpoint_type,
                          fcam_argmax=use_argmax)
 
-        if args.is_master:
-            trainer.print_performances(checkpoint_type=eval_checkpoint_type)
-            trainer.report(epoch, split=constants.TESTSET,
-                           checkpoint_type=eval_checkpoint_type)
-            trainer.save_performances(
-                epoch=epoch, checkpoint_type=eval_checkpoint_type)
+        trainer.print_performances(checkpoint_type=eval_checkpoint_type)
+        trainer.report(epoch, split=constants.TESTSET,
+                       checkpoint_type=eval_checkpoint_type)
+        trainer.save_performances(
+            epoch=epoch, checkpoint_type=eval_checkpoint_type)
 
         trainer.switch_perf_meter_to_captured()
 
@@ -133,13 +122,10 @@ def main():
             eval_checkpoint_type, tagargmax, dt.datetime.now() - t0))
         DLLogger.flush()
 
-    dist.barrier()
-    if args.is_master:
-        trainer.save_args()
-        trainer.plot_perfs_meter()
-        bye(trainer.args)
+    trainer.save_args()
+    trainer.plot_perfs_meter()
+    bye(trainer.args)
 
 
 if __name__ == '__main__':
     main()
-    
