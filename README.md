@@ -1,8 +1,33 @@
-### Pytorch 1.10.0 code for:
-`Negative Evidence Matters in Interpretable Histology Image Classification` ([https://arxiv.
-org/abs/2201.02445](https://arxiv.org/abs/2201.02445))
+# [Negative Evidence Matters in Interpretable Histology Image Classification (MIDL2024)](https://arxiv.org/pdf/2201.02445)
 
-### MIDL 2022: [[Slides]](/doc/slides.pdf)  [[Video presentation]](https://drive.google.com/file/d/1akxwosPIVt2QpyPugIA0FIJwjBeEyuJj/view?usp=sharing)  [[Poster]](/doc/poster.pdf)
+
+by
+**Soufiane Belharbi<sup>1</sup>,
+Marco Pedersoli<sup>1</sup>,
+Ismail Ben Ayed<sup>1</sup>,
+Luke McCaffrey<sup>2</sup>,
+Eric Granger<sup>1</sup>**
+
+
+<sup>1</sup> LIVIA, Dept. of Systems Engineering, ÉTS, Montreal, Canada
+<br/>
+<sup>2</sup> Goodman Cancer Research Centre, Dept. of Oncology, McGill University, Montreal, Canada
+
+<p align="center"><img src="doc/promo.png" alt="outline" width="30%"></p>
+
+[![arXiv](https://img.shields.io/badge/arXiv-2407.12927-b31b1b.svg)](https://arxiv.org/pdf/2201.02445)
+[![Slides](https://img.shields.io/badge/Slides-blue?logo=googleslides)](/doc/slides.pdf)
+[![Video presentation](https://img.shields.io/badge/Video_presentation-orange?logo=airplayvideo)](https://drive.google.com/file/d/1akxwosPIVt2QpyPugIA0FIJwjBeEyuJj/view?usp=sharing)
+[![Poster](https://img.shields.io/badge/Poster-green)](/doc/poster.pdf)
+
+## Abstract
+Using only global image-class labels, weakly-supervised learning methods, such as class activation mapping, allow training CNNs to jointly classify an image, and locate regions of interest associated with the predicted class.
+However, without any guidance at the pixel level, such methods may yield inaccurate regions. This problem is known to be more challenging with histology images than with natural ones, since objects are less salient, structures have more variations, and foreground and background regions have stronger similarities. Therefore, computer vision methods for visual interpretation of CNNs may not directly apply.
+In this paper, a simple yet efficient method based on a composite loss is proposed to learn information from the fully negative samples (i.e., samples without positive regions), and thereby reduce false positives/negatives. Our new loss function contains two complementary terms: the first exploits positive evidence collected from the CNN classifier, while the second leverages the fully negative samples from training data. In particular, a pre-trained CNN is equipped with a decoder that allows refining the regions of interest. The CNN is exploited to collect both positive and negative evidence at the pixel level to train the decoder. Our method called NEGEV benefits from the fully negative samples that naturally occur in the data, without any additional supervision signals beyond image-class labels.
+Extensive experiments [github.com/sbelharbi/negev](https://github.com/sbelharbi/negev) show that our proposed method can substantial outperform related state-of-art methods on GlaS (public benchmark for colon cancer), and Camelyon16 (patch-based benchmark for breast cancer using three different backbones). Our results highlight the benefits of using both positive and negative evidence, the first obtained from a classifier, and the other naturally available in datasets.
+
+
+**Code: Pytorch 1.10.0. This branch supports multi-gpu. In case of issues related to distributed, you can use the branch [main-no-distribute](https://github.com/sbelharbi/negev/blob/main-no-distribute) which runs on single gpu.**
 
 ### Citation:
 ```
@@ -14,14 +39,11 @@ org/abs/2201.02445](https://arxiv.org/abs/2201.02445))
 }
 ```
 
-### Issues:
-Please create a github issue.
-
 
 ### Content:
 * [Method](#method)
 * [Results](#results)
-* [Requirements](#re2q)
+* [Requirements](#reqs)
 * [Datasets](#datasets)
 * [Run code](#run)
 
