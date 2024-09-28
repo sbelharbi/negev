@@ -179,7 +179,7 @@ class Trainer(Basic):
         self.load_tr_masks &= args.localization_avail
         mask_root = args.mask_root if self.load_tr_masks else ''
 
-        self.loaders, self.train_sampler = get_data_loader(
+        self.loaders = get_data_loader(
             data_roots=self.args.data_paths,
             metadata_root=self.args.metadata_root,
             batch_size=self.args.batch_size,
@@ -468,9 +468,6 @@ class Trainer(Basic):
         torch.backends.cudnn.benchmark = True
         torch.backends.cudnn.deterministic = True
         self.model.train()
-
-        if self.train_sampler is not None:
-            self.train_sampler.set_epoch(self.epoch)
 
     def on_epoch_end(self):
         self.loss.update_t()
