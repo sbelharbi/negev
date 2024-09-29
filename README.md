@@ -1,4 +1,4 @@
-# [Negative Evidence Matters in Interpretable Histology Image Classification (MIDL2024)](https://arxiv.org/pdf/2201.02445)
+# [Negative Evidence Matters in Interpretable Histology Image Classification (MIDL2022)](https://arxiv.org/pdf/2201.02445)
 
 
 by
